@@ -240,7 +240,7 @@ test
 
 ##### LOOKING AT AN AVERAGE SPECIMEN ######
 N=32 #number of landmarks 
-specs=4 #number of specimens 
+specs=12 #number of specimens 
 all_combined=array(dim=c(N,3,specs)) #3 is the columns of data we need (radii, azimuth, polar)
 
 i=1
@@ -258,7 +258,7 @@ for (i in 1:specs)
 
 
 #55, 56, 57, 59, 60 are all missing data and should be zero 
-all_combined[1:18, 1:3, 1:4] <- c(0.000000, 0.000000, 0.000000)
+all_combined[1:18, 1:3, 1:12] <- c(0.000000, 0.000000, 0.000000)
 #write.csv(all_combined, file = 'all_combined.csv')
 
 radii=all_combined[,1,] #looking at the second column (usually x,y,z) but here it is the radii, aziumuth, and polar 
