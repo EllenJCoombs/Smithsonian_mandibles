@@ -7,14 +7,12 @@
 ####################################################################
 
 
-
-
-
-
-
-
-
-
+library(Rvcg)
+library(rgl)
+library(Morpho)
+library(rgl)
+library(geomorph)
+library(paleomorph)
 
 #========================================#
 #      1. READ IN THE MANUAL LMS         #
@@ -39,10 +37,6 @@ for(i in 1:length(ptslist))
 dimnames(ptsarray)[3]<-list(
   substr(dir("./ply",pattern=".ply"),1,(nchar(dir("./ply",pattern=".ply"))-4)))
 arraylm<-ptsarray #this is your array
-
-
-
-
 
 
 #Read in RHS and make a fake midline for mysticetes and any disarticulated archs 
