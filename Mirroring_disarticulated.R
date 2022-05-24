@@ -6,6 +6,35 @@
 #                                                                  #
 ####################################################################
 
+#========================================#
+#      1. READ IN THE MANUAL LMS         #
+#========================================#
+
+
+###=========== LOADING DATA SET 1: WHOLE LANDMARKED SKULL 
+#Read in landmarks manually placed on the whole skull 
+
+ntaxa<-172 ## number of specimens (extant only) - NB can also put this in the code below (x,y,z) 
+#data set .pts from Checkpoint
+
+ptslist<-dir(pattern='.pts',recursive=T)
+ptsarray<-array(dim=c(123,3,172)) #dim=c(number of landmarks and semilandmarks, number of dimensions, number of specimens)
+for(i in 1:length(ptslist))
+{
+  ptsarray[,,i]<-as.matrix(read.table(file=ptslist[i],skip=2,header=F,sep="",row.names=1))
+}
+
+#Need the .plys for this 
+#[3] stays the same 
+dimnames(ptsarray)[3]<-list(
+  substr(dir("./ply",pattern=".ply"),1,(nchar(dir("./ply",pattern=".ply"))-4)))
+arraylm<-ptsarray #this is your array
+
+
+
+
+
+
 #Read in RHS and make a fake midline for mysticetes and any disarticulated archs 
 
 LM1_bilat=slidedlmsZARHI[c(5,69),,] ## LM1 on left (5) and corresponding LM on the right side (69)
