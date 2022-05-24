@@ -106,3 +106,9 @@ arranged_ptsarray=abind::abind(arraylm_midline[c(1:8),,],
 #Check 
 text3d(arranged_ptsarray[c(1:32),,3], text = 1:32)
 
+#Check 
+text3d(arranged_ptsarray[c(1:32),,3], text = 1:32)
+
+spheres3d(arranged_ptsarray[c(9,10,12,13),,3], col = 'green', radius = 4)
+spheres3d(arranged_ptsarray[c(1:9,14:32),,3], col = 'red', radius = 4)
+spheres3d(arranged_ptsarray[c(19,20),,3], col = 'blue', radius = 4)
