@@ -1,4 +1,14 @@
 
+
+####################################################################
+#                                                                  #
+#     MIRROR YOUR SLID, RESAMPLED LMs                              #
+#     NOTE: DIFFERENT CODE FOR SYMMETRIC AND ASYMMETRIC SPECIMENS  #
+#                                                                  #
+####################################################################
+
+
+
 #========================================#
 #      1. READ IN THE MANUAL LMS         #
 #========================================#
@@ -41,7 +51,7 @@ arraylm <- estimate.missing(arraylm,method="TPS")
 
 
 #Check the LMs
-text3d(arraylm[,,1], text = 1:36)
+text3d(arraylm[,,3], text = 1:36)
 
 #Read in RHS and make a fake midline for mysticetes and any disarticulated archs 
 
@@ -64,16 +74,16 @@ LM4_midline=colSums(LM4_bilat)/2
 
 #Then just visually check that you're happy the code worked (IMPORTANT!):
 ## read in a specimen ply and plot these landmarks on it:
-Pipa=ply2mesh(file="E:/Smithsonian Postdoc/Year 1/Mandible scans/LMs and curves/disarticulated/ply/Coronodon havensteini.ply")
+Pipa=ply2mesh(file="E:/Smithsonian Postdoc/Year 1/Mandible scans/LMs and curves/disarticulated/ply/Coronodon havensteini CCNHM 108.ply")
 shade3d(Pipa, col="white")
-spheres3d(LM1_midline[,1]) #bracketed is specimen number
-spheres3d(LM2_midline[,2])
-spheres3d(LM3_midline[,3]) #bracketed is specimen number
-spheres3d(LM4_midline[,4])
-spheres3d(ptsarray[c(9,33),, 4], col = 'green') #check how these look with 5, 69, 6, 70
-spheres3d(ptsarray[c(10,34),,4], col = 'red')
-spheres3d(ptsarray[c(12,35),, 4], col = 'blue') #check how these look with 5, 69, 6, 70
-spheres3d(ptsarray[c(13,36),,4], col = 'yellow')
+spheres3d(LM1_midline[,3], col = 'red') #bracketed is specimen number
+spheres3d(LM2_midline[,3], col = 'red')
+spheres3d(LM3_midline[,3], col = 'red') #bracketed is specimen number
+spheres3d(LM4_midline[,3], col = 'red')
+spheres3d(arraylm[c(9,33),, 3], col = 'green') #check how these look with 5, 69, 6, 70
+spheres3d(arraylm[c(10,34),,3], col = 'red')
+spheres3d(arraylm[c(12,35),, 3], col = 'blue') #check how these look with 5, 69, 6, 70
+spheres3d(arraylm[c(13,36),,3], col = 'yellow')
 
 #spheres3d(slidedlmsARCHS[c(58,112),,1], col = 'red')
 #Then you add these two new midline landmarks to your landmark set:
@@ -83,6 +93,8 @@ Shape_data_with_bilats=abind::abind(arraylm, LM1_midline, LM2_midline, LM3_midli
 spheres3d(Shape_data_with_bilats[c(1:36),,3], col = 'green', radius = 4)
 spheres3d(Shape_data_with_bilats[c(37:40),,3], col = 'red', radius = 4)
 
+text3d(Shape_data_with_bilats[c(1:40),,3],text = 1:40)
+
 
 #Delete superfluous LMs
 arraylm_midline <- Shape_data_with_bilats[-c(9,10,12,13,33,34,35,36),,]
@@ -91,24 +103,30 @@ arraylm_midline <- Shape_data_with_bilats[-c(9,10,12,13,33,34,35,36),,]
 text3d(arraylm_midline[c(1:32),,3], text = 1:32)
 
 
-
-
-#Now rearrange so it's the same order as 
-
-#You can use abind to bind datasets - this rearranges the data into the same order as the mysts (i.e. without the weird 1-120, 2 = 121, 19 - 122, 20 -123)
+#Renumber the landmarks 
 arranged_ptsarray=abind::abind(arraylm_midline[c(1:8),,], 
-                             arraylm_midline[29:30,,],
-                             arraylm_midline[11,,],
-                             arraylm_midline[31:32,,],
-                             arraylm_midline[c(14:32),,],
-                             along= 1)
+                               arraylm_midline[c(29:30),,],
+                               arraylm_midline[c(9:10),,],
+                               arraylm_midline[11,,],
+                               arraylm_midline[c(31:32),,],
+                               arraylm_midline[c(12:13),,],
+                               arraylm_midline[c(14:32),,],
+                               along= 1)
+
+#12 and 13 still messed up 
+
+arranged_ptsarray=abind::abind(arranged_ptsarray[c(1:11),,], 
+                               arranged_ptsarray[c(14:15),,],
+                               arranged_ptsarray[c(12:13),,],
+                               arranged_ptsarray[c(16:32),,],
+                               along= 1)
+
 
 #Check 
 text3d(arranged_ptsarray[c(1:32),,3], text = 1:32)
 
-#Check 
-text3d(arranged_ptsarray[c(1:32),,3], text = 1:32)
-
-spheres3d(arranged_ptsarray[c(9,10,12,13),,3], col = 'green', radius = 4)
-spheres3d(arranged_ptsarray[c(1:9,14:32),,3], col = 'red', radius = 4)
-spheres3d(arranged_ptsarray[c(19,20),,3], col = 'blue', radius = 4)
+#Check
+Pipa=ply2mesh(file="E:/Smithsonian Postdoc/Year 1/Mandible scans/LMs and curves/disarticulated/ply/Coronodon havensteini CCNHM 108.ply")
+shade3d(Pipa, col="white")
+spheres3d(arranged_ptsarray[c(9,10,12,13),,3], col = 'red', radius = 4)
+spheres3d(arranged_ptsarray[c(1:8, 11, 14:32),,3], col = 'green', radius = 4)
