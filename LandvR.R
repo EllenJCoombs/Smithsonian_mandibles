@@ -37,11 +37,11 @@ library(paleomorph)
 ###=========== LOADING DATA SET 1: WHOLE LANDMARKED SKULL 
 #Read in landmarks manually placed on the whole skull 
 
-ntaxa <- 12 ## number of specimens (extant only) - NB can also put this in the code below (x,y,z) 
+ntaxa <- 74 ## number of specimens (extant only) - NB can also put this in the code below (x,y,z) 
 #data set .pts from Checkpoint
 
 ptslist<-dir(pattern='.pts',recursive=T)
-ptsarray<-array(dim=c(32,3,12)) #dim=c(number of landmarks and semilandmarks, number of dimensions, number of specimens)
+ptsarray<-array(dim=c(32,3,74)) #dim=c(number of landmarks and semilandmarks, number of dimensions, number of specimens)
 for(i in 1:length(ptslist))
 {
   ptsarray[,,i]<-as.matrix(read.table(file=ptslist[i],skip=2,header=F,sep="",row.names=1))
@@ -50,7 +50,7 @@ for(i in 1:length(ptslist))
 #Need the .plys for this 
 #[3] stays the same 
 dimnames(ptsarray)[3]<-list(
-  substr(dir("./ply",pattern=".ply"),1,(nchar(dir("./ply",pattern=".ply"))-4)))
+  substr(dir("./pts",pattern=".pts"),1,(nchar(dir("./pts",pattern=".pts"))-4)))
 arraylm<-ptsarray #this is your array
 
 
@@ -61,7 +61,7 @@ arraylm <- estimate.missing(arraylm,method="TPS")
 
 #careful not to have missing data 
 #check here and also check all of the LMs are numbered correctly 
-text3d(arraylm[,,2], text=1:dim(arraylm)[1])
+text3d(arraylm[,,22], text=1:dim(arraylm)[1])
 
 #This would be to change the names according to the species (as above with .ply)
 #dimnames(arraylm)[3]=species
@@ -75,16 +75,32 @@ manual_skull <- arraylm
 #                           #
 #############################
 
-arraylm=gpagen(arraylm) #Remove non-shape aspects 
-array_coords=arraylm$coords #Subset out the coords 
-size=arraylm$Csize #centroid size
+manual_skull=gpagen(manual_skull) #Remove non-shape aspects 
+manual_coords=manual_skull$coords #Subset out the coords 
+size=manual_skull$Csize #centroid size
 #PlotTangentSpace if you want to see a quick morphospace of the skulls 
 
-Proc_full <- array_coords
+#Proc_full <- manual_coords
 
-PCA <- geomorph::gm.prcomp(array_coords)
-plot(PCA, axis1 = 1, axis2 = 2) #labels = T) #to plot 
+PCA <- geomorph::gm.prcomp(manual_coords)
+plot(PCA, axis1 = 1, axis2 = 2) #to plot 
 summary(PCA) # take a look at the PCs (now called comp)
+
+
+#to look at specimen position 
+text(PCA$x[,1],PCA$x[,2], pos = 4)
+
+
+#-- Plot with 3D data (example with PC1max)
+plotRefToTarget( PCA$shapes$shapes.comp1$min, PCA$shapes$shapes.comp1$min,
+                 method = "points",axes = F) 
+
+spheres3d(PCA$shapes$shapes.comp1$min, radius= .0008,color = "grey")
+spheres3d(PCA$shapes$shapes.comp1$max, radius= .001,color = "grey")
+spheres3d(PCA$shapes$shapes.comp2$min, radius=.01,color = "grey")
+spheres3d(PCA$shapes$shapes.comp2$max, radius=.01,color = "red")
+
+text3d(final_procrusted_ARCHS[frontal,,1], text=frontal)
 
 
 #Plot the LMs on the mesh 
@@ -92,7 +108,7 @@ summary(PCA) # take a look at the PCs (now called comp)
 
 atarfa=ply2mesh(file="E:/Smithsonian Postdoc/Year 1/Mandible scans/full mandibles asymmetry test/ASYMM DATA/PTS full mand/ply/Delphinapterus leucas NHM 1933.10.13.4.ply")
 shade3d(atarfa,col='white')
-spheres3d(ptsarray[,,1], radius = 4, color = 'darkgreen')
+spheres3d(manual_coords[,,1], radius = 4, color = 'darkgreen')
 #spheres3d(final_dataset[c(19:24, 85:90, 369:458, 1359:1448),,48], radius = 4, color = 'pink')
 
 
@@ -106,35 +122,15 @@ spheres3d(ptsarray[,,1], radius = 4, color = 'darkgreen')
 #                                                          #                          
 ############################################################
 
-setwd("X:xxxxxxx/xxxxxx") 
-#NB the plys have been transformed to ASCII (from binary) so that landmarks can be visualised on the mesh 
-#See code 'Binary_ASCII_ply.R" if needed for this step
 
-ntaxa <- 12 ## number of specimens (extant only) - NB can also put this in the code below (x,y,z) 
-#data set .pts from Checkpoint
+#Manually cut previous data set (to computer mirror)
 
-ptslist<-dir(pattern='.pts',recursive=T)
-ptsarrayAC<-array(dim=c(18,3,12)) #dim=c(number of landmarks and semilandmarks, number of dimensions, number of specimens)
-for(i in 1:length(ptslist))
-{
-  ptsarrayAC[,,i]<-as.matrix(read.table(file=ptslist[i],skip=2,header=F,sep="",row.names=1))
-}
+mirror_coords <- manual_coords[c(1:18),,]
+spheres3d(mirror_coords[,,1], radius = 0.004, color = 'darkgreen')
+text3d(mirror_coords[,,1], text = 1:18)
+#spheres3d(final_dataset[c(19:24, 85:90, 369:458, 1359:1448),,48], radiu
+#Check 
 
-#Set to the whole project directory for this - the code wants to look for 'ply' folder 
-dimnames(ptsarrayAC)[3]<-list(
-  substr(dir("./ply",pattern=".ply"),1,(nchar(dir("./ply",pattern=".ply"))-4)))
-arraylmAC<-ptsarrayAC
-
-
-##### CHANGING MISSING LANDMARKS BEFORE MIRRORING ######### - NB, use 'mirrored_skull_LMs.R' if you are not using your own data 
-#Otherwise you get weird numbers that aren't 9999 mirroring
-#estimate.missing from Geomorph is used for estimating missing landmarks 
-
-arraylmAC[which(arraylmAC==9999)] <- NA
-arraylmAC <- estimate.missing(arraylmAC,method="TPS")
-
-#let's call arraylmAC ' skull' to differentiate from the mirrored skull LMs
-manual_skull <- arraylm
 
 
 #MIRROR THESE LANDMARKS over the central line plane of the skull 
@@ -150,19 +146,19 @@ midline<-as.integer(c(9, 10, 12, 13)) # LM that are on the midline + parasphenoi
 left.lm <- c(1:8,11,14:18)
 #exclude midline points. Last number = last number of newpts 
 
-lengmatrice=dim(arraylmAC)[1]*2-length(midline)#-length(nasalfrontal) #should be the length with the both sides, 1 is the column and 2 
+lengmatrice=dim(mirror_coords)[1]*2-length(midline)#-length(nasalfrontal) #should be the length with the both sides, 1 is the column and 2 
 #just means that we are duplicating the data to be on both sides of the skull 
 
-Matrice=array(NA,dim = c(lengmatrice,3,12)) #3 is the dimensions (x, y, z), 2 is specimen number 
-Matrice[1:dim(arraylmAC)[1],,]=arraylmAC
+Matrice=array(NA,dim = c(lengmatrice,3,74)) #3 is the dimensions (x, y, z), 2 is specimen number 
+Matrice[1:dim(mirror_coords)[1],,]=mirror_coords
 
 #left.lm <- c(1:37,39,41:47,50,52,53,57:60,62:66)
 #left.lm <- c(2,3,5:18,21:37,39,41:47,50,52,53,57:60,62:66)
 #exclude midline points. Last number = last number of newpts 
 
 #Check left.lm and midline [left.lm,,x] = species number
-spheres3d(arraylmAC[left.lm,,1],radius=4) #left LMs
-spheres3d(arraylmAC[midline,,1],radius=4,col='red') #midline
+spheres3d(mirror_coords[left.lm,,1],radius=0.004) #left LMs
+spheres3d(mirror_coords[midline,,1],radius=0.004,col='red') #midline
 
 right.lm <- c(19:32) #left.lm +1:lenmatrice
 
@@ -178,8 +174,8 @@ MirroredAC
 
 atarfa=ply2mesh(file="E:/Smithsonian Postdoc/Year 1/Mandible scans/full mandibles asymmetry test/ASYMM DATA/PTS full mand/ply/Delphinapterus leucas NHM 1933.10.13.4.ply")
 shade3d(atarfa,col='white')
-spheres3d(MirroredAC[,,1],col= 'red', radius=4)
-spheres3d(ptsarray[,,1], col = 'green' ,radius=4)
+spheres3d(MirroredAC[,,22],col= 'red', radius=0.004)
+spheres3d(manual_coords[,,22], col = 'green' ,radius=0.004)
 #check dimensions
 
 #############################
