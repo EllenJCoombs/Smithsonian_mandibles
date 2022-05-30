@@ -1,34 +1,3 @@
-
-#Code adapted from Guillerme, T and Weisbecker V (2019). 
-#landvR: Tools for measuring landmark position variation. Zenodo. doi:10.5281/zenodo.2620785
-
-
-###########################################
-#                                         #
-#         Looking at asymmetry            #
-#                                         #
-###########################################
-
-
-#Looking at asymmetry in odontocetes and mysticetes
-#Run for all specimens (157) 
-#Run for a subset of bilaterally symmetrical specimens (mysticetes in this example)
-
-##### PLEASE NOTE ########
-#The code shows you how to read in your own .pts files to make them an array
-#If you would like to replicate the results shown in this study rather than your own .pts, 
-#please use the data from the data file: full skull = 'manual_skull_LMs.R' (LMs 1:123) and mirrored skull = 'mirrored_skull_LMs.R' (LMs 1:66)
-
-#Code to run to pull out radii for assessing asymmetry in cetaceans
-
-library(Rvcg)
-library(rgl)
-library(Morpho)
-library(rgl)
-library(geomorph)
-library(paleomorph)
-
-
 #========================================#
 #      1. READ IN THE MANUAL LMS         #  #Or read in our data set 'manual_skull_LMs.R' if you are not using your own data and skip this part
 #========================================#
@@ -204,44 +173,44 @@ library(landvR)
 
 ############# LANDVR ###################
 #Check the values
-Proc_mirrored[1,,2] == Proc_full[1,,2]
+MirroredAC[1,,2] == manual_coords[1,,2]
 # FALSE FALSE FALSE
 ## This is due to rounding, in fact they have the same 9 digits - round them 
-round(Proc_mirrored[1,,2], digits = 9) == round(Proc_full[1,,2], digits = 9)
+round(MirroredAC[1,,2], digits = 9) == round(manual_coords[1,,2], digits = 9)
 # TRUE TRUE TRUE
 
 #I’ve updated landvR to version 0.3 where the coordinates.difference function now have a tolerance optional argument.
 #You can use the following to get the 0 difference results:
 
-differences_between_lms <- coordinates.difference(coordinates = Proc_mirrored[,,1],
-                                                  reference = Proc_full[,,1],
+differences_between_lms <- coordinates.difference(coordinates = MirroredAC[,,1],
+                                                  reference = manual_coords[,,1],
                                                   type = "spherical",
                                                   rounding = 9)
 
 #Remove errornous missing landmarks (these should be zero because they are static)
-differences_between_lms[[1]][1:18, 1:3] <- c(0.000000, 0.000000, 0.000000)
+#differences_between_lms[[1]][1:18, 1:3] <- c(0.000000, 0.000000, 0.000000)
 
 
 #Ellen's own colour function 
 colfunc <- colorRampPalette(c("red", "yellow", "white"))
-colfunc(20)
-plot(rep(1,20),col=colfunc(20),pch=19,cex=3)
+colfunc(10)
+plot(rep(1,10),col=colfunc(10),pch=19,cex=3)
 
-get.col.spectrum <- landvR::procrustes.var.plot(Proc_full[,,1], Proc_mirrored[,,1], col.val = differences_between_lms[[1]][,1], col = colfunc)
+get.col.spectrum <- landvR::procrustes.var.plot(manual_coords[,,22], MirroredAC[,,22], col.val = differences_between_lms[[1]][,1], col = colfunc)
 
 test=differences_between_lms[[1]][,1] #this is a test for specimen 1 to look at the differences between lms 
 test
 
 ##### LOOKING AT AN AVERAGE SPECIMEN ######
 N=32 #number of landmarks 
-specs=12 #number of specimens 
+specs=74 #number of specimens 
 all_combined=array(dim=c(N,3,specs)) #3 is the columns of data we need (radii, azimuth, polar)
 
 i=1
 for (i in 1:specs)
 {
-  all_differences <- coordinates.difference(coordinates = Proc_mirrored[,,i],
-                                            reference = Proc_full[,,i],
+  all_differences <- coordinates.difference(coordinates = MirroredAC[,,i],
+                                            reference = manual_coords[,,i],
                                             type = "spherical",
                                             rounding = 9)
   
@@ -252,7 +221,7 @@ for (i in 1:specs)
 
 
 #55, 56, 57, 59, 60 are all missing data and should be zero 
-all_combined[1:18, 1:3, 1:12] <- c(0.000000, 0.000000, 0.000000)
+#all_combined[1:18, 1:3, 1:74] <- c(0.000000, 0.000000, 0.000000)
 #write.csv(all_combined, file = 'all_combined.csv')
 
 radii=all_combined[,1,] #looking at the second column (usually x,y,z) but here it is the radii, aziumuth, and polar 
@@ -264,9 +233,23 @@ radii=all_combined[,1,] #second column of whole dataset with just the radii [,1,
 
 
 #Looking at the average radii compared to specimen 21 (or an average specimen)
-get.col.spectrum <- landvR::procrustes.var.plot(Proc_full[,,9], Proc_mirrored[,,9], col.val = radii_mean, col = colfunc)
+get.col.spectrum <- landvR::procrustes.var.plot(manual_coords[,,9], MirroredAC[,,9], col.val = radii_mean, col = colfunc)
 #datcol2<-c(rep("black",66),get.col.spectrum)
 #open3d()
+
+
+################
+#              #
+#   T-test     #
+#              #
+################
+
+
+#Test difference between sides in entire dataset - is the variance on the right higher than on the left+midline ?
+side_test <- t.test(manual_coords, MirroredAC)
+side_test
+
+
 
 #############################
 #                           #
