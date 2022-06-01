@@ -1,6 +1,6 @@
 
 Library(geomorph)
-
+Library(rgl)
 
 #========================================#
 #      1. READ IN THE MANUAL LMS         #  #Or read in our data set 'manual_skull_LMs.R' if you are not using your own data and skip this part
