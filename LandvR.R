@@ -1,6 +1,33 @@
 
-Library(geomorph)
-Library(rgl)
+#Code adapted from Guillerme, T and Weisbecker V (2019). 
+#landvR: Tools for measuring landmark position variation. Zenodo. doi:10.5281/zenodo.2620785
+
+
+###########################################
+#                                         #
+#         Looking at asymmetry            #
+#                                         #
+###########################################
+
+
+#Looking at asymmetry in odontocetes and mysticetes
+#Run for all specimens (157) 
+#Run for a subset of bilaterally symmetrical specimens (mysticetes in this example)
+
+##### PLEASE NOTE ########
+#The code shows you how to read in your own .pts files to make them an array
+#If you would like to replicate the results shown in this study rather than your own .pts, 
+#please use the data from the data file: full skull = 'manual_skull_LMs.R' (LMs 1:123) and mirrored skull = 'mirrored_skull_LMs.R' (LMs 1:66)
+
+#Code to run to pull out radii for assessing asymmetry in cetaceans
+
+library(Rvcg)
+library(rgl)
+library(Morpho)
+library(rgl)
+library(geomorph)
+library(paleomorph)
+
 
 #========================================#
 #      1. READ IN THE MANUAL LMS         #  #Or read in our data set 'manual_skull_LMs.R' if you are not using your own data and skip this part
@@ -10,11 +37,11 @@ Library(rgl)
 ###=========== LOADING DATA SET 1: WHOLE LANDMARKED SKULL 
 #Read in landmarks manually placed on the whole skull 
 
-ntaxa <- 74 ## number of specimens (extant only) - NB can also put this in the code below (x,y,z) 
+ntaxa <- 90 ## number of specimens (extant only) - NB can also put this in the code below (x,y,z) 
 #data set .pts from Checkpoint
 
 ptslist<-dir(pattern='.pts',recursive=T)
-ptsarray<-array(dim=c(32,3,74)) #dim=c(number of landmarks and semilandmarks, number of dimensions, number of specimens)
+ptsarray<-array(dim=c(32,3,90)) #dim=c(number of landmarks and semilandmarks, number of dimensions, number of specimens)
 for(i in 1:length(ptslist))
 {
   ptsarray[,,i]<-as.matrix(read.table(file=ptslist[i],skip=2,header=F,sep="",row.names=1))
@@ -48,9 +75,9 @@ manual_skull <- arraylm
 #                           #
 #############################
 
-manual_skull=gpagen(manual_skull) #Remove non-shape aspects 
-manual_coords=manual_skull$coords #Subset out the coords 
-size=manual_skull$Csize #centroid size
+final_dataset=gpagen(final_dataset) #Remove non-shape aspects 
+manual_coords=final_dataset$coords #Subset out the coords 
+size=final_dataset$Csize #centroid size
 #PlotTangentSpace if you want to see a quick morphospace of the skulls 
 
 #Proc_full <- manual_coords
@@ -68,12 +95,12 @@ text(PCA$x[,1],PCA$x[,2], pos = 4)
 plotRefToTarget( PCA$shapes$shapes.comp1$min, PCA$shapes$shapes.comp1$min,
                  method = "points",axes = F) 
 
-spheres3d(PCA$shapes$shapes.comp1$min, radius= .0008,color = "grey")
+spheres3d(PCA$shapes$shapes.comp1$min, radius= .008,color = "grey")
 spheres3d(PCA$shapes$shapes.comp1$max, radius= .001,color = "grey")
 spheres3d(PCA$shapes$shapes.comp2$min, radius=.01,color = "grey")
 spheres3d(PCA$shapes$shapes.comp2$max, radius=.01,color = "red")
 
-text3d(final_procrusted_ARCHS[frontal,,1], text=frontal)
+
 
 
 #Plot the LMs on the mesh 
@@ -122,7 +149,7 @@ left.lm <- c(1:8,11,14:18)
 lengmatrice=dim(mirror_coords)[1]*2-length(midline)#-length(nasalfrontal) #should be the length with the both sides, 1 is the column and 2 
 #just means that we are duplicating the data to be on both sides of the skull 
 
-Matrice=array(NA,dim = c(lengmatrice,3,74)) #3 is the dimensions (x, y, z), 2 is specimen number 
+Matrice=array(NA,dim = c(lengmatrice,3,94)) #3 is the dimensions (x, y, z), 2 is specimen number 
 Matrice[1:dim(mirror_coords)[1],,]=mirror_coords
 
 #left.lm <- c(1:37,39,41:47,50,52,53,57:60,62:66)
@@ -192,7 +219,7 @@ differences_between_lms <- coordinates.difference(coordinates = MirroredAC[,,1],
                                                   rounding = 9)
 
 #Remove errornous missing landmarks (these should be zero because they are static)
-#differences_between_lms[[1]][1:18, 1:3] <- c(0.000000, 0.000000, 0.000000)
+differences_between_lms[[1]][1:18, 1:3] <- c(0.000000, 0.000000, 0.000000)
 
 
 #Ellen's own colour function 
@@ -200,14 +227,14 @@ colfunc <- colorRampPalette(c("red", "yellow", "white"))
 colfunc(10)
 plot(rep(1,10),col=colfunc(10),pch=19,cex=3)
 
-get.col.spectrum <- landvR::procrustes.var.plot(manual_coords[,,22], MirroredAC[,,22], col.val = differences_between_lms[[1]][,1], col = colfunc)
+get.col.spectrum <- landvR::procrustes.var.plot(manual_coords[,,82], MirroredAC[,,82], col.val = differences_between_lms[[1]][,1], col = colfunc)
 
 test=differences_between_lms[[1]][,1] #this is a test for specimen 1 to look at the differences between lms 
 test
 
 ##### LOOKING AT AN AVERAGE SPECIMEN ######
 N=32 #number of landmarks 
-specs=74 #number of specimens 
+specs=94 #number of specimens 
 all_combined=array(dim=c(N,3,specs)) #3 is the columns of data we need (radii, azimuth, polar)
 
 i=1
@@ -225,7 +252,7 @@ for (i in 1:specs)
 
 
 #55, 56, 57, 59, 60 are all missing data and should be zero 
-#all_combined[1:18, 1:3, 1:74] <- c(0.000000, 0.000000, 0.000000)
+all_combined[1:18, 1:3, 1:94] <- c(0.000000, 0.000000, 0.000000)
 #write.csv(all_combined, file = 'all_combined.csv')
 
 radii=all_combined[,1,] #looking at the second column (usually x,y,z) but here it is the radii, aziumuth, and polar 
@@ -237,7 +264,7 @@ radii=all_combined[,1,] #second column of whole dataset with just the radii [,1,
 
 
 #Looking at the average radii compared to specimen 21 (or an average specimen)
-get.col.spectrum <- landvR::procrustes.var.plot(manual_coords[,,9], MirroredAC[,,9], col.val = radii_mean, col = colfunc)
+get.col.spectrum <- landvR::procrustes.var.plot(manual_coords[,,31], MirroredAC_proc[,,31], col.val = radii_mean, col = colfunc)
 #datcol2<-c(rep("black",66),get.col.spectrum)
 #open3d()
 
@@ -304,7 +331,7 @@ library(factoextra)
 
 #Compute PCA 
 #Load landmark data 
-landmarks <- read.csv('radii_X_PCA.csv')
+landmarks <- read.csv('radii.csv')
 
 # IF ERRORS #
 #landmarks[,6] <- as.numeric(as.character(landmarks[,6]))
@@ -312,7 +339,7 @@ landmarks <- read.csv('radii_X_PCA.csv')
 #any(is.na(landmarks)) #Want this to be FALSE 
 #landmarks[is.na(landmarks)] <- 0.015850205 #Or whatever the value is 
 
-myPr <- prcomp(landmarks[1:174,9:65], scale = TRUE) #pull out the columns of data which are nummerical only
+myPr <- prcomp(landmarks[1:94,4:17], scale = TRUE) #pull out the columns of data which are nummerical only
 
 #If the above isn't working, it's likely there is a numeric/factor problem
 landmarks <- as.numeric(landmarks$X67)
@@ -332,16 +359,17 @@ library(ggplot2) #plot PCA
 library(viridis)
 library(ggfortify)
 library(RColorBrewer)
+library(ggrepel)
 
 #plot
-a <- ggplot(Landradii, aes(PC1, PC2, col = suborder, fill = suborder, labels = TRUE)) + 
+a <- ggplot(Landradii, aes(PC1, PC2, col = landmarks$suborder, fill = landmarks$suborder, labels = TRUE)) + 
   geom_point(shape = 21) + 
   xlab('PC 1 (XX.X%)') + 
   ylab('XX.X%)') + 
-  geom_point(aes(size = sum.radii)) +
+  geom_point(aes(size = landmarks$sum_radii)) +
   theme_classic() +
   #geom_text(aes(label= ID), hjust=1, vjust=2) - with numbers of specimens 
-  #geom_text_repel(aes(label = test2$ID)) - with numbers of specimens repelled 
+  geom_text_repel(aes(label = landmarks$species)) #- with numbers of specimens repelled 
   
   a 
 #a + scale_x_reverse() #if you want to reverse axis 
@@ -364,10 +392,13 @@ library(ggConvexHull)
 install.packages('ggConvexHull')
 
 #Adding a convex hull 
-ggplot(Landradii,aes(x = PC1, y = PC2,col = frequency)) +
-  geom_convexhull(alpha = 0.3,aes(fill = frequency)) + 
+ggplot(Landradii,aes(x = PC1, y = PC2,col = landmarks$suborder)) +
+  geom_convexhull(alpha = 0.3,aes(fill = landmarks$suborder)) + 
   xlab('PC 1 (XX.X%)') + 
   ylab('PC2 (XX.X%)') +
   geom_point() +
   theme_minimal() + 
   scale_x_reverse()
+
+
+
